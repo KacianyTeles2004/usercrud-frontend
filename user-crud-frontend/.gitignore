@@ -1,0 +1,11 @@
+# Ignorar arquivos e pastas do VSCode
+.vscode/
+
+# Ignorar arquivos temporários e binários
+node_modules/
+npm-debug.log
+yarn-error.log
+
+# Ignorar arquivos de build do frontend (caso você tenha build, como com o React)
+build/
+dist/
