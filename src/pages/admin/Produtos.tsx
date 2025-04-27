@@ -107,6 +107,10 @@ export function Produtos() {
   const [produtoParaEditar, setProdutoParaEditar] = useState<Produto | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   /*const navigate = useNavigate();*/
+   // Verificar o tipo do usuário no localStorage
+   const userJson = localStorage.getItem('user') || '{}';
+  const user = JSON.parse(userJson);
+  const isEstoquista = user.tipo === 'STOCKIST';
 
   interface Produto {
     id: number;
@@ -125,6 +129,7 @@ export function Produtos() {
   }
 
   const handleOpenModal = (produto: Produto) => {
+    if (isEstoquista) return; // Bloqueia o acesso ao modal para estoquistas
     setProdutoSelecionado(produto);
     setModalProdutosOpen(true);
   };
@@ -155,6 +160,7 @@ export function Produtos() {
   }*/
 
   const handleToggleActive = async () => {
+    if (isEstoquista) return; // Bloqueia a ação para estoquistas
     if (!produtoParaConfirmar) return;
 
     try {
@@ -212,10 +218,13 @@ export function Produtos() {
             onChange={(e) => setSearchTerm(e.target.value)}
           />
         </SearchBar>
-        <Button onClick={() => setIsModalOpen(true)}>
-          <PackagePlus size={20} />
-          Adicionar Produto
-        </Button>
+        {/* Exibir botão apenas para administradores */}
+        {!isEstoquista && (
+          <Button onClick={() => setIsModalOpen(true)}>
+            <PackagePlus size={20} />
+            Adicionar Produto
+          </Button>
+        )}
       </PageHeader>
 
       <Table>
@@ -287,8 +296,12 @@ export function Produtos() {
       <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title="Adicionar Novo Produto">
         <CadastrarProduto />
       </Modal>
-      <Modal isOpen={editOpen} onClose={() => setIsModalOpen(false)} title="Editar Produto">
-        {produtoParaEditar && <EditarProdutos produtoId={produtoParaEditar.id} />}
+      // ...existing code...
+      <Modal isOpen={editOpen} onClose={() => setEditOpen(false)} title="Editar Produto">
+        {produtoParaEditar && <EditarProdutos 
+          produtoId={produtoParaEditar.id} 
+          onClose={() => setEditOpen(false)}  // Adicione esta linha
+        />}
       </Modal>
       <Pagination>
         <button onClick={prevPage} disabled={currentPage === 0}>

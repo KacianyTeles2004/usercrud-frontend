@@ -4,19 +4,16 @@ import { Search, ShoppingBag, Trash2, Truck } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { aumentarQuantidade, calcularSubtotal, diminuirQuantidade, getCarrinhoItems, removerDoCarrinho } from './utils/carrinhoUtils';
 import { toast, ToastContainer } from 'react-toastify';
-
 const CartContainer = styled.div`
   max-width: 1200px;
   margin: 2rem auto;
   padding: 0 1rem;
 `;
-
 const Title = styled.h1`
   font-size: 1.875rem;
   color: #111827;
   margin-bottom: 2rem;
 `;
-
 const CartItem = styled.div`
   display: flex;
   align-items: center;
@@ -26,42 +23,35 @@ const CartItem = styled.div`
   border-radius: 8px;
   margin-bottom: 1rem;
 `;
-
 const ProductImage = styled.img`
   width: 100px;
   height: 100px;
   border-radius: 8px;
   object-fit: cover;
 `;
-
 const ProductInfo = styled.div`
   flex: 1;
 `;
-
 const ProductName = styled.h3`
   font-size: 1.125rem;
   color: #111827;
   margin-bottom: 0.5rem;
 `;
-
 const ProductPrice = styled.p`
   color: #2563eb;
   font-weight: 600;
 `;
-
 const QuantityControl = styled.div`
   display: flex;
   align-items: center;
   gap: 1rem;
 `;
-
 const CartSummary = styled.div`
   background: white;
   padding: 1.5rem;
   border-radius: 8px;
   margin-top: 2rem;
 `;
-
 const SummaryRow = styled.div`
   display: flex;
   justify-content: space-between;
@@ -75,13 +65,11 @@ const SummaryRow = styled.div`
     font-size: 1.125rem;
   }
 `;
-
 const ShippingOptions = styled.div`
   margin: 1.5rem 0;
   border-top: 1px solid #e5e7eb;
   padding-top: 1.5rem;
 `;
-
 const ShippingTitle = styled.h3`
   font-size: 1rem;
   color: #4b5563;
@@ -90,7 +78,6 @@ const ShippingTitle = styled.h3`
   align-items: center;
   gap: 0.5rem;
 `;
-
 const ShippingOption = styled.label`
   display: flex;
   align-items: center;
@@ -101,62 +88,60 @@ const ShippingOption = styled.label`
   margin-bottom: 0.5rem;
   cursor: pointer;
   transition: all 0.2s;
-
   &:hover {
     border-color: #2563eb;
   }
-
   input {
     width: 1.25rem;
     height: 1.25rem;
     accent-color: #2563eb;
   }
 `;
-
 const ShippingInfo = styled.div`
   flex: 1;
 `;
-
 const ShippingName = styled.p`
   font-weight: 500;
   color: #111827;
 `;
-
 const DeliveryTime = styled.p`
   font-size: 0.875rem;
   color: #6b7280;
 `;
-
 const ShippingPrice = styled.p`
   font-weight: 600;
   color: #2563eb;
 `;
-
 const CepContainer = styled.div`
   margin: 1.5rem 0;
   border-top: 1px solid #e5e7eb;
   padding-top: 1.5rem;
 `;
-
 const CepInputContainer = styled.div`
   display: flex;
   gap: 0.5rem;
   margin-bottom: 1rem;
 `;
-
 const CepInput = styled.input`
   padding: 0.75rem;
   border: 1px solid #d1d5db;
   border-radius: 8px;
   flex: 1;
   font-size: 0.875rem;
-
   &:focus {
     outline: none;
     border-color: #2563eb;
     box-shadow: 0 0 0 1px #2563eb;
   }
 `;
+
+interface CartItem {
+  id: number;
+  nome: string;
+  preco: number;
+  qtd: number;
+  imagem?: string;
+}
 
 export function Carrinho() {
   const [selectedShipping, setSelectedShipping] = useState('pac');
@@ -165,7 +150,6 @@ export function Carrinho() {
   const [cep, setCep] = useState('');
   const [freteOptions, setFreteOptions] = useState<any>(null);
   const [isLoadingFrete, setIsLoadingFrete] = useState(false);
-
   useEffect(() => {
     // Carregar itens do carrinho ao montar o componente
     loadCartItems();
@@ -176,36 +160,29 @@ export function Carrinho() {
     setCartItems(items);
     setSubtotal(calcularSubtotal());
   };
-
   const handleIncreaseQuantity = (id: number) => {
     aumentarQuantidade(id);
     loadCartItems();
   };
-
   const handleDecreaseQuantity = (id: number) => {
     diminuirQuantidade(id);
     loadCartItems();
   };
-
   const handleRemoveItem = (id: number) => {
     removerDoCarrinho(id);
     loadCartItems();
   };
-
   const formatarCep = (value: string) => {
     return value.replace(/\D/g, '').replace(/^(\d{5})(\d)/, "$1-$2").substring(0, 9);
   };
-
   const handleCepChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setCep(formatarCep(e.target.value));
   };
-
   const calcularFreteHandler = async () => {
     if (cep.length < 8) {
       toast.error('Por favor, digite um CEP válido');
       return;
     }
-
     setIsLoadingFrete(true);
     
     // Simulando uma chamada de API com um pequeno atraso
@@ -232,15 +209,12 @@ export function Carrinho() {
       setIsLoadingFrete(false);
     }, 1000); // Simulando 1 segundo de delay para dar impressão de carregamento
   };
-
   // Calcula o valor total com frete apenas se o frete foi calculado
   const shippingPrice = freteOptions ? freteOptions[selectedShipping].price : 0;
   const total = subtotal + shippingPrice;
-
   return (
     <CartContainer>
       <Title>Carrinho de Compras</Title>
-
       {cartItems.length === 0 ? (
         <div style={{ 
           textAlign: 'center', 
@@ -255,7 +229,7 @@ export function Carrinho() {
             Adicione produtos para continuar comprando
           </p>
           <Button 
-            onClick={() => window.location.href = '/'} 
+            to="/"
             style={{ width: 'auto', margin: '0 auto' }}
           >
             Continuar Comprando
@@ -299,13 +273,11 @@ export function Carrinho() {
               </Button>
             </CartItem>
           ))}
-
           <CartSummary>
             <SummaryRow>
               <span>Subtotal</span>
               <span>R${subtotal.toFixed(2)}</span>
             </SummaryRow>
-
             {/* Seção de cálculo de frete */}
             <CepContainer>
               <ShippingTitle>
@@ -360,7 +332,6 @@ export function Carrinho() {
                 </ShippingOptions>
               )}
             </CepContainer>
-
             {freteOptions && (
               <SummaryRow>
                 <span>Frete</span>
@@ -372,7 +343,6 @@ export function Carrinho() {
               <span>Total</span>
               <span>R${total.toFixed(2)}</span>
             </SummaryRow>
-
             <Button 
               style={{ width: '100%', marginTop: '1rem' }}
               disabled={!freteOptions}

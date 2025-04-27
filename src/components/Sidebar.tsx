@@ -1,6 +1,7 @@
 import styled from 'styled-components';
 import { Users, Package } from 'lucide-react';
 import { NavLink } from 'react-router-dom';
+import { useEffect, useState } from 'react';
 
 const SidebarContainer = styled.aside`
   width: 250px;
@@ -9,7 +10,6 @@ const SidebarContainer = styled.aside`
   border-right: 1px solid #e5e7eb;
   padding: 2rem 1rem;
 `;
-
 const NavItem = styled(NavLink)`
   display: flex;
   align-items: center;
@@ -19,11 +19,9 @@ const NavItem = styled(NavLink)`
   border-radius: 8px;
   margin-bottom: 0.5rem;
   transition: all 0.2s;
-
   &:hover {
     background: #f3f4f6;
   }
-
   &.active {
     background: #A23F3F;
     color: white;
@@ -31,12 +29,26 @@ const NavItem = styled(NavLink)`
 `;
 
 export function Sidebar() {
+  const [userTipo, setUserTipo] = useState<string | null>(null);
+
+  useEffect(() => {
+    try {
+      const user = JSON.parse(localStorage.getItem('user') || '{}');
+      setUserTipo(user.tipo || null);
+    } catch (error) {
+      console.error('Erro ao fazer parse do JSON:', error);
+      setUserTipo(null);
+    }
+  }, []);
+
   return (
     <SidebarContainer>
+      {userTipo === 'ADMIN' && (
       <NavItem to="/admin/usuarios">
         <Users size={20} />
         Usuários
       </NavItem>
+      )}
       <NavItem to="/admin/produtos">
         <Package size={20} />
         Produtos

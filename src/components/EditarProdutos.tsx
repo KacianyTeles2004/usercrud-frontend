@@ -28,9 +28,10 @@ interface Usuario {
 
 interface EditarProdutosProps {
   produtoId: number;
+  onClose: () => void; // pra fechar o modal
 }
 
-const EditarProdutos: React.FC<EditarProdutosProps> = ({ produtoId }) => {
+const EditarProdutos: React.FC<EditarProdutosProps> = ({ produtoId, onClose }) => {
   const [produto, setProduto] = useState<Produto | null>(null);
   const [usuario, setUsuario] = useState<Usuario | null>(null);
   const navigate = useNavigate()
@@ -222,6 +223,7 @@ const EditarProdutos: React.FC<EditarProdutosProps> = ({ produtoId }) => {
             name="preco"
             value={produto.preco}
             onChange={handleInputChange}
+            disabled={usuario.tipo !== 'ADMIN'}
           />
         </Campo>
         <Campo>
@@ -268,9 +270,16 @@ const EditarProdutos: React.FC<EditarProdutosProps> = ({ produtoId }) => {
             />
           </Campo>
         </ImagensContainer>
-        <Button type="button" onClick={salvarAlteracoes}>
-          Salvar
-        </Button>
+          <Button type="button" onClick={salvarAlteracoes}>
+            Salvar
+          </Button>
+          <Button 
+            type="button" 
+            onClick={onClose}
+            style={{ backgroundColor: '#666'}}
+          >
+            Cancelar
+          </Button>
       </Formulario>
       <ToastContainer />
     </Card>
@@ -278,6 +287,14 @@ const EditarProdutos: React.FC<EditarProdutosProps> = ({ produtoId }) => {
 };
 
 export default EditarProdutos;
+
+// ...existing code...
+const BotoesContainer = styled.div`
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+`;
+// ...existing code...
 
 const Card = styled.div`
   display: flex;

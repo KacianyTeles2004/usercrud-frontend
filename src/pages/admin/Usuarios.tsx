@@ -122,7 +122,6 @@ interface User {
   name: string;
   email: string;
   senha: string;
-  senhaNova: string;
   senhaConfirmacao: string;
   tipo: string;
   ativo: boolean;
@@ -173,8 +172,8 @@ export function Usuarios() {
     if (selectedUser) {
       try {
         // Verifica se as senhas foram preenchidas e são iguais
-        if (selectedUser.senhaNova || selectedUser.senhaConfirmacao) {
-          if (selectedUser.senhaNova !== selectedUser.senhaConfirmacao) {
+        if (selectedUser.senha || selectedUser.senhaConfirmacao) {
+          if (selectedUser.senha !== selectedUser.senhaConfirmacao) {
             setErrorMessage('As senhas não coincidem.');
             return;
           }
@@ -190,9 +189,8 @@ export function Usuarios() {
         };
 
         // Adiciona as senhas apenas se forem preenchidas
-        if (selectedUser.senha && selectedUser.senhaNova) {
+        if (selectedUser.senha) {
           userData.senha = selectedUser.senha;
-          userData.senhaNova = selectedUser.senhaNova;
         }
 
         // Envia os dados para o backend
@@ -361,18 +359,12 @@ export function Usuarios() {
 
             <FormGroup>
               <Label>Alterar Senha</Label>
-              <Input
-                type="password"
-                placeholder="Senha atual"
-                onChange={(e) =>
-                  setSelectedUser({ ...selectedUser, senha: e.target.value })
-                }
-              />
+            
               <Input
                 type="password"
                 placeholder="Nova senha"
                 onChange={(e) =>
-                  setSelectedUser({ ...selectedUser, senhaNova: e.target.value })
+                  setSelectedUser({ ...selectedUser, senha: e.target.value })
                 }
               />
               <Input
