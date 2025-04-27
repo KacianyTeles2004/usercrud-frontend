@@ -1,3 +1,4 @@
+
 import styled from 'styled-components';
 import { ShoppingCart, Home, LogOut, UserCircle, UserCog, Cog, LogIn } from 'lucide-react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
