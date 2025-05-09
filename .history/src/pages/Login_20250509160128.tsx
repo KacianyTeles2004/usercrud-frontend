@@ -1,10 +1,11 @@
-import PedidoFinalizado from './pages/PedidoFinalizado';
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 
 import { Button } from '../components/Button';
 import { authUser } from '../services/axiosServices';
+
+import PedidoFinalizado from './pages/PedidoFinalizado';
 
 const Container = styled.div`
   display: flex;

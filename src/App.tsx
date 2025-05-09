@@ -1,16 +1,21 @@
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import CheckoutEndereco from './pages/CheckoutEndereco';
+import CheckoutPagamento from './pages/CheckoutPagamento';
+import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
+
 import { Header } from './components/Header';
+import { AdminLayout } from './pages/admin/AdminLayout';
+import { Produtos } from './pages/admin/Produtos';
+import { Usuarios } from './pages/admin/Usuarios';
+import { Cadastro } from './pages/Cadastro';
+import { Carrinho } from './pages/Carrinho';
+import Configuracoes from './pages/Configuracoes';
+import DetalhesProduto from './pages/DetalhesProduto';
 import { Home } from './pages/Home';
 import { Login } from './pages/Login';
-import { Cadastro } from './pages/Cadastro';
-import { GlobalStyles } from './styles/GlobalStyles';
-import { AdminLayout } from './pages/admin/AdminLayout';
-import { Usuarios } from './pages/admin/Usuarios';
-import { Produtos } from './pages/admin/Produtos';
-import { Carrinho } from './pages/Carrinho';
-import DetalhesProduto from './pages/DetalhesProduto';
-import Configuracoes from './pages/Configuracoes';
+import PedidoFinalizado from './pages/PedidoFinalizado';
+import ResumoCompra from './pages/ResumoCompra';
 import ProtectedRoute from './services/ProtectedRoute';
+import { GlobalStyles } from './styles/GlobalStyles';
 
 function App() {
   return (
@@ -18,6 +23,11 @@ function App() {
       <GlobalStyles />
       <Header />
       <Routes>
+        <Route path="/checkout/endereco" element={<CheckoutEndereco />} />
+        <Route path="/checkout/pagamento" element={<CheckoutPagamento />} />
+        <Route path="/checkout/resumo" element={<ResumoCompra />} />
+        <Route path="/checkout/finalizado" element={<PedidoFinalizado />} />
+        
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login />} />
         <Route path="/cadastrar" element={<Cadastro />} />

@@ -1,10 +1,8 @@
-import PedidoFinalizado from './pages/PedidoFinalizado';
-import React from 'react';
-import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
-
 import { Button } from '../components/Button';
 import { authUser } from '../services/axiosServices';
+import React from 'react';
+import { useNavigate } from 'react-router-dom';
 
 const Container = styled.div`
   display: flex;
