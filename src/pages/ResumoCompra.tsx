@@ -4,6 +4,8 @@ import styled from 'styled-components';
 import { createContext, useContext, useState } from 'react';
 import { Button } from '../components/Button';
 import { ReactNode } from 'react';
+import axios from 'axios'; 
+
 
 const Container = styled.div`
   max-width: 800px;
@@ -162,20 +164,28 @@ export const PedidoProvider = ({ children }: { children: ReactNode }) => {
 export const usePedidoContext = () => useContext(PedidoContext);
 export default function ResumoCompra() {
   const navigate = useNavigate();
-  const { pedido } = usePedidoContext();
+  const { pedido, setPedido } = usePedidoContext();
 
   // Calcula valores totais
   const subtotal = pedido.itens?.reduce((total, item) => total + (item.preco * item.qtd), 0) || 0;
   const frete = pedido.frete || 15.90; // Valor mockado caso não exista
   const total = subtotal + frete;
 
-  const handleFinalizarPedido = () => {
-    // Aqui você implementaria a lógica para:
-    // 1. Criar o pedido no backend
-    // 2. Limpar o carrinho
-    // 3. Redirecionar para tela de pedido finalizado
+const handleFinalizarPedido = async () => {
+  try {
+    // 1. Envia o pedido para o backend
+    await axios.post('/api/pedidos', pedido);
+
+    // 2. Limpa o carrinho
+    setPedido({ itens: [] });
+
+    // 3. Redireciona para a tela de pedido finalizado
     navigate('/checkout/finalizado');
-  };
+  } catch (error) {
+    console.error('Erro ao finalizar pedido:', error);
+    alert('Não foi possível finalizar o pedido. Tente novamente.');
+  }
+};
 
   return (
     <Container>

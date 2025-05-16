@@ -11,49 +11,48 @@ import { Home } from './pages/Home';
 import { Login } from './pages/Login';
 import PedidoFinalizado from './pages/PedidoFinalizado';
 import ResumoCompra from './pages/ResumoCompra';
-// import CheckoutEndereco from './pages/CheckoutEndereco'; // Adicione esta importação
-import CheckoutPagamento from './pages/CheckoutPagamento'; 
+// import CheckoutEndereco from './pages/CheckoutEndereco'; // Mantida conforme solicitado
+import CheckoutPagamento from './pages/CheckoutPagamento';
 import ProtectedRoute from './services/ProtectedRoute';
 import { GlobalStyles } from './styles/GlobalStyles';
-import { PedidoProvider } from './components/PedidoContext'; 
+import { PedidoProvider } from './components/PedidoContext';
 
 function App() {
   return (
-    <BrowserRouter>
-      <GlobalStyles />
-      <Header />
-      <Routes>
-        {/* Rotas Públicas */}
-        <Route path="/" element={<Home />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/cadastrar" element={<Cadastro />} />
-        <Route path="/configuracoes" element={<Configuracoes />} />
-        <Route path="/produto/:id" element={<DetalhesProduto />} />
-        { <Route path="/carrinho" element={<Carrinho />} /> }
+    <PedidoProvider>
+      <BrowserRouter>
+        <GlobalStyles />
+        <Header />
+        <Routes>
+          {/* Rotas Públicas */}
+          <Route path="/" element={<Home />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/cadastrar" element={<Cadastro />} />
+          <Route path="/configuracoes" element={<Configuracoes />} />
+          <Route path="/produto/:id" element={<DetalhesProduto />} />
+          <Route path="/carrinho" element={<Carrinho />} />
 
-        {/* Fluxo de Checkout */}
-        {/* { <Route path="/checkout/endereco" element={<CheckoutEndereco />} /> } */}
-        <Route path="/checkout/pagamento" element={<CheckoutPagamento />} />
-        <Route path="/checkout/resumo" element={<ResumoCompra />} />
-        <Route path="/checkout/finalizado/:numero" element={<PedidoFinalizado />} />
+          {/* Fluxo de Checkout - Mantido conforme original */}
+          {/* <Route path="/checkout/endereco" element={<CheckoutEndereco />} /> */}
+          <Route path="/checkout/pagamento" element={<CheckoutPagamento />} />
+          <Route path="/checkout/resumo" element={<ResumoCompra />} />
+          <Route path="/checkout/finalizado/:numero" element={<PedidoFinalizado />} />
 
-        root.render(
-        <PedidoProvider><App /></PedidoProvider>);
-
-        {/* Rotas Admin */}
-        <Route element={<ProtectedRoute allowedRoles={['STOCKIST', 'ADMIN']} />}>
-          <Route path="/admin" element={<AdminLayout />}>
-            <Route path="produtos" element={<Produtos />} />
-            <Route element={<ProtectedRoute allowedRoles={['ADMIN']} />}>
-              <Route path="usuarios" element={<Usuarios />} />
+          {/* Rotas Admin */}
+          <Route element={<ProtectedRoute allowedRoles={['STOCKIST', 'ADMIN']} />}>
+            <Route path="/admin" element={<AdminLayout />}>
+              <Route path="produtos" element={<Produtos />} />
+              <Route element={<ProtectedRoute allowedRoles={['ADMIN']} />}>
+                <Route path="usuarios" element={<Usuarios />} />
+              </Route>
             </Route>
           </Route>
-        </Route>
 
-        {/* Rota Fallback */}
-        <Route path="*" element={<Navigate to="/" replace />} />
-      </Routes>
-    </BrowserRouter>
+          {/* Rota Fallback */}
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </BrowserRouter>
+    </PedidoProvider>
   );
 }
 

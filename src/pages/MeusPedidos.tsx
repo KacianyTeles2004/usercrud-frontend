@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 
 import { Button } from '../components/Button';
-import { listarPedidosPorUsuario } from '../services/axiosServices';
+import listarPedidosPorUsuario from '../services/axiosServices';
 
 const Container = styled.div`
   max-width: 1200px;

@@ -1,4 +1,5 @@
 import axiosInstance from "../api/axiosConfig";
+import axios from 'axios';
 
 export const cadastrarUsuario = async (data: any) => {
     try {
@@ -9,6 +10,23 @@ export const cadastrarUsuario = async (data: any) => {
         throw error;
     }
 };
+
+
+
+// const api = axios.create({
+//   baseURL: 'http://localhost:8080/api', // Substitua pela URL da sua API
+// });
+
+// api.interceptors.request.use(config => {
+//   const token = localStorage.getItem('token');
+//   if (token) {
+//     config.headers.Authorization = `Bearer ${token}`;
+//   }
+//   return config;
+// });
+
+// export default api;
+
 
 export const buscarUsuarioPorId = async (id: number) => {
     try {
@@ -140,3 +158,17 @@ export const updateImagens = async (produtoId: number, formData: FormData) => {
         },
     });
 };
+
+export async function listarPedidosPorUsuario(usuarioId: number) {
+    try {
+        const response = await axiosInstance.get(`/pedido/usuario/${usuarioId}`);
+        return response.data;
+    } catch (error) {
+        console.error('Erro ao listar pedidos do usuário:', error);
+        throw error;
+    }
+}
+
+export default listarPedidosPorUsuario;
+
+

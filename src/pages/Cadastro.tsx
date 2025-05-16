@@ -135,6 +135,26 @@ const LoadingSpinner = styled.div`
   }
 `;
 
+
+// 2. TIPAGEM - Tipos mais completos e organizados
+interface EnderecoUsuario {
+  cep: string;
+  logradouro: string;
+  numero: string;
+  complemento?: string;
+  bairro: string;
+  cidade: string;
+  estado: string;
+}
+
+interface DadosCadastro {
+  nome: string;
+  email: string;
+  senha: string;
+  confirmacaoSenha: string;
+  endereco: EnderecoUsuario;
+}
+
 interface ViaCepResponse {
   cep: string;
   logradouro: string;
@@ -142,176 +162,294 @@ interface ViaCepResponse {
   bairro: string;
   localidade: string;
   uf: string;
-  ibge?: string;
-  gia?: string;
-  ddd?: string;
-  siafi?: string;
   erro?: boolean;
 }
 
+// 3. COMPONENTE PRINCIPAL
 export function Cadastro() {
   const navigate = useNavigate();
+  const [isLoading, setIsLoading] = useState(false);
   const [isLoadingCep, setIsLoadingCep] = useState(false);
   
-  // Estado para os dados de endereço
-  const [address, setAddress] = useState({
-    cep: "",
-    logradouro: "",
-    numero: "",
-    complemento: "",
-    bairro: "",
-    cidade: "",
-    estado: ""
+  // Estado único para todos os dados do formulário
+  const [formData, setFormData] = useState<DadosCadastro>({
+    nome: '',
+    email: '',
+    senha: '',
+    confirmacaoSenha: '',
+    endereco: {
+      cep: '',
+      logradouro: '',
+      numero: '',
+      complemento: '',
+      bairro: '',
+      cidade: '',
+      estado: ''
+    }
   });
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    navigate('/login');
-  };
-  
-  // Função para buscar endereço pelo CEP
-  const fetchAddressByCep = async () => {
-    if (!address.cep || address.cep.length < 8) {
-      alert("Por favor, insira um CEP válido");
-      return;
+  // 4. MANIPULAÇÃO DE CEP - Busca automática ao digitar CEP completo
+  const handleCepChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const cep = e.target.value.replace(/\D/g, '');
+    
+    setFormData({
+      ...formData,
+      endereco: {
+        ...formData.endereco,
+        cep: e.target.value
+      }
+    });
+
+    // Busca automática quando CEP está completo
+    if (cep.length === 8) {
+      await buscarEnderecoPorCep(cep);
     }
-    
-    // Remove caracteres não numéricos
-    const cleanCep = address.cep.replace(/\D/g, '');
-    
+  };
+
+  // 5. FUNÇÃO DE BUSCA DE CEP - Separada para melhor organização
+  const buscarEnderecoPorCep = async (cep: string) => {
     setIsLoadingCep(true);
     try {
-      const response = await fetch(`https://viacep.com.br/ws/${cleanCep}/json/`);
+      const response = await fetch(`https://viacep.com.br/ws/${cep}/json/`);
       const data: ViaCepResponse = await response.json();
-      
+
       if (data.erro) {
-        alert("CEP não encontrado");
-        return;
+        throw new Error('CEP não encontrado');
       }
-      
-      setAddress({
-        ...address,
-        cep: data.cep,
-        logradouro: data.logradouro,
-        bairro: data.bairro,
-        cidade: data.localidade,
-        estado: data.uf,
+
+      setFormData({
+        ...formData,
+        endereco: {
+          ...formData.endereco,
+          cep: data.cep,
+          logradouro: data.logradouro,
+          bairro: data.bairro,
+          cidade: data.localidade,
+          estado: data.uf
+        }
       });
     } catch (error) {
       console.error("Erro ao buscar CEP:", error);
-      alert("Ocorreu um erro ao buscar o CEP");
+      alert(error instanceof Error ? error.message : "Erro ao buscar endereço");
     } finally {
       setIsLoadingCep(false);
     }
   };
 
+  // 6. MANIPULADOR GENÉRICO DE CAMPO - Para inputs normais
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    
+    if (name in formData.endereco) {
+      setFormData({
+        ...formData,
+        endereco: {
+          ...formData.endereco,
+          [name]: value
+        }
+      });
+    } else {
+      setFormData({
+        ...formData,
+        [name]: value
+      });
+    }
+  };
+
+  // 7. VALIDAÇÃO DE FORMULÁRIO - Centralizada
+  const validarFormulario = (): boolean => {
+    // Valida senhas iguais
+    if (formData.senha !== formData.confirmacaoSenha) {
+      alert('As senhas não coincidem!');
+      return false;
+    }
+
+    // Valida campos obrigatórios
+    const camposObrigatorios = [
+      formData.nome,
+      formData.email,
+      formData.senha,
+      formData.endereco.cep,
+      formData.endereco.logradouro,
+      formData.endereco.numero,
+      formData.endereco.bairro,
+      formData.endereco.cidade,
+      formData.endereco.estado
+    ];
+
+    if (camposObrigatorios.some(campo => !campo)) {
+      alert('Preencha todos os campos obrigatórios!');
+      return false;
+    }
+
+    return true;
+  };
+
+  // 8. SUBMISSÃO DO FORMULÁRIO - Com tratamento de erro
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!validarFormulario()) return;
+
+    setIsLoading(true);
+    
+    try {
+      const response = await fetch('http://localhost:8080/usuarios', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          nome: formData.nome,
+          email: formData.email,
+          senha: formData.senha,
+          endereco: formData.endereco
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Erro no cadastro');
+      }
+
+      alert('Cadastro realizado com sucesso!');
+      navigate('/login');
+    } catch (error) {
+      console.error('Erro no cadastro:', error);
+      alert(error instanceof Error ? error.message : 'Erro ao processar cadastro');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // 9. RENDERIZAÇÃO DO FORMULÁRIO
   return (
     <Container>
       <FormCard>
         <Title>Criar uma conta</Title>
         <Form onSubmit={handleSubmit}>
-          {/* Dados pessoais */}
+          {/* Seção de Dados Pessoais */}
           <FormSection>
             <SectionTitle>Dados Pessoais</SectionTitle>
-            <Input 
-              type="text" 
-              placeholder="Nome Completo" 
-              required 
+            <Input
+              type="text"
+              name="nome"
+              placeholder="Nome Completo"
+              value={formData.nome}
+              onChange={handleInputChange}
+              required
             />
-            <Input 
-              type="email" 
-              placeholder="Email" 
-              required 
+            <Input
+              type="email"
+              name="email"
+              placeholder="Email"
+              value={formData.email}
+              onChange={handleInputChange}
+              required
             />
             <FormRow>
-              <Input 
-                type="password" 
-                placeholder="Senha" 
-                required 
+              <Input
+                type="password"
+                name="senha"
+                placeholder="Senha"
+                value={formData.senha}
+                onChange={handleInputChange}
+                required
               />
-              <Input 
-                type="password" 
-                placeholder="Confirmar Senha" 
-                required 
+              <Input
+                type="password"
+                name="confirmacaoSenha"
+                placeholder="Confirmar Senha"
+                value={formData.confirmacaoSenha}
+                onChange={handleInputChange}
+                required
               />
             </FormRow>
           </FormSection>
-          
-          {/* Endereço */}
+
+          {/* Seção de Endereço */}
           <FormSection>
             <SectionTitle>Endereço</SectionTitle>
             <CepRow>
-              <Input 
-                type="text" 
-                placeholder="CEP" 
-                value={address.cep}
-                onChange={(e) => setAddress({...address, cep: e.target.value})}
-                required 
+              <Input
+                type="text"
+                name="cep"
+                placeholder="CEP"
+                value={formData.endereco.cep}
+                onChange={handleCepChange}
+                required
               />
-              <SearchButton 
-                type="button" 
-                onClick={fetchAddressByCep}
+              <SearchButton
+                type="button"
+                onClick={() => buscarEnderecoPorCep(formData.endereco.cep.replace(/\D/g, ''))}
+                disabled={isLoadingCep}
               >
                 Buscar CEP
                 {isLoadingCep && <LoadingSpinner />}
               </SearchButton>
             </CepRow>
-            
-            <Input 
-              type="text" 
-              placeholder="Logradouro" 
-              value={address.logradouro}
-              onChange={(e) => setAddress({...address, logradouro: e.target.value})}
-              required 
+
+            <Input
+              type="text"
+              name="logradouro"
+              placeholder="Logradouro"
+              value={formData.endereco.logradouro}
+              onChange={handleInputChange}
+              required
             />
-            
+
             <FormRow>
-              <Input 
-                type="text" 
-                placeholder="Número" 
-                value={address.numero}
-                onChange={(e) => setAddress({...address, numero: e.target.value})}
-                required 
+              <Input
+                type="text"
+                name="numero"
+                placeholder="Número"
+                value={formData.endereco.numero}
+                onChange={handleInputChange}
+                required
               />
-              <Input 
-                type="text" 
-                placeholder="Complemento" 
-                value={address.complemento}
-                onChange={(e) => setAddress({...address, complemento: e.target.value})}
+              <Input
+                type="text"
+                name="complemento"
+                placeholder="Complemento"
+                value={formData.endereco.complemento}
+                onChange={handleInputChange}
               />
             </FormRow>
-            
-            <Input 
-              type="text" 
-              placeholder="Bairro" 
-              value={address.bairro}
-              onChange={(e) => setAddress({...address, bairro: e.target.value})}
-              required 
+
+            <Input
+              type="text"
+              name="bairro"
+              placeholder="Bairro"
+              value={formData.endereco.bairro}
+              onChange={handleInputChange}
+              required
             />
-            
+
             <FormRow>
-              <Input 
-                type="text" 
-                placeholder="Cidade" 
-                value={address.cidade}
-                onChange={(e) => setAddress({...address, cidade: e.target.value})}
-                required 
+              <Input
+                type="text"
+                name="cidade"
+                placeholder="Cidade"
+                value={formData.endereco.cidade}
+                onChange={handleInputChange}
+                required
               />
-              <Input 
-                type="text" 
-                placeholder="Estado" 
-                value={address.estado}
-                onChange={(e) => setAddress({...address, estado: e.target.value})}
-                required 
+              <Input
+                type="text"
+                name="estado"
+                placeholder="Estado"
+                value={formData.endereco.estado}
+                onChange={handleInputChange}
+                required
               />
             </FormRow>
           </FormSection>
-          
-          <Button type="submit" fullWidth>
-            Cadastrar-se
+
+          <Button type="submit" fullWidth disabled={isLoading}>
+            {isLoading ? 'Cadastrando...' : 'Cadastrar-se'}
           </Button>
         </Form>
-        
+
         <LoginLink>
           Já tem uma conta?{' '}
           <Button variant="link" to="/login">
